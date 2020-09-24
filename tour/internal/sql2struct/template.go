@@ -64,22 +64,3 @@ func (t *StructTemplate) Generate(tableName string, tplColumns []*StructColumn) 
 	}
 	return nil
 }
-
-
-
-type SkuData struct {
-  // id
-Id int32  `json:id`
-  // 点位编号
-   MacNo int32  `json:MacNo`
-  // 上线第几周
-   Week int8  `json:week`
-  // 商品ID
-   GoodsID int32  `json:GoodsID`
-  // 销量
-   Sale int32  `json:Sale`
-}
-
-func (model SkuData) TableName() string {
-        return "sku_data"
-}
