@@ -1,5 +1,10 @@
 package errcode
 
+import (
+	"fmt"
+	"net/http"
+)
+
 type Error struct {
 	code int `json:"code"`
 	msg string `json:"msg"`
