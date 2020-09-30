@@ -28,6 +28,10 @@ func init() {
 	}
 }
 
+// @title 博客系统
+// @version 1.0
+// @description Go之博客系统
+// @termsOfService https://github.com/go-programming-tour-book
 func main() {
 	global.Logger.Infof("%s: go-projects/%s", "eddycjy", "blog-service")
 	gin.SetMode(global.ServerSetting.RunMode)

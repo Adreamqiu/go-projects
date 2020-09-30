@@ -1,5 +1,9 @@
 package model
 
+import (
+    "github.com/go-projects/blog-service/pkg/app"
+)
+
 type Article struct {
 	*Model
     // 文章标题
@@ -12,6 +16,11 @@ type Article struct {
     Content  string  `json:content`
     // 状态 0为禁用、1为启用
     State uint8  `json:state`
+}
+
+type ArticleSwagger struct {
+    List []*Article
+    Pager *app.Pager
 }
 
 func (model Article) TableName() string {
