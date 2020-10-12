@@ -17,6 +17,27 @@ type AppSettingS struct {
   	LogSavePath string
   	LogFileName string
   	LogFileExt string
+	UploadSavePath        string
+	UploadServerUrl       string
+	UploadImageMaxSize    int
+	UploadImageAllowExts  []string
+	DefaultContextTimeout  time.Duration
+}
+
+type EmailSettingS struct {
+	Host     string
+	Port     int
+	UserName string
+	Password string
+	IsSSL    bool
+	From     string
+	To       []string
+}
+
+type JWTSettingS struct {
+	Secret string
+	Issuer string
+	Expire time.Duration
 }
 
 type DatabaseSettingS struct {

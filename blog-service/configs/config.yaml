@@ -9,6 +9,27 @@ App:
   LogSavePath: storage/LogSavePath
   LogFileName: app
   LogFileExt: .LogFileExt
+  UploadSavePath: storage/uploads
+  UploadServerUrl: http://127.0.0.1:8080/static
+  UploadImageMaxSize: 5  # MB
+  UploadImageAllowExts:
+    - .jpg
+    - .jpeg
+    - .png
+  DefaultContextTimeout: 60
+Email:
+  Host: smtp.qq.com
+  Port: 465
+  UserName: xxx
+  Password: xxx
+  IsSSL: true
+  From: xxx
+  To:
+    - xxx
+JWT:
+  Secret: qiusheng
+  Issuer: blog-service
+  Expire: 7200
 Database:
   DBType: mysql
   UserName: root # 填写你的数据库账号

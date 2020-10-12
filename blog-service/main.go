@@ -1,16 +1,17 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/go-projects/blog-service/global"
+	"github.com/go-projects/blog-service/internal/model"
+	"github.com/go-projects/blog-service/internal/routers"
+	"github.com/go-projects/blog-service/pkg/logger"
+	"github.com/go-projects/blog-service/pkg/setting"
+	"github.com/go-projects/blog-service/pkg/tracer"
+	"github.com/natefinch/lumberjack"
+	"log"
 	"net/http"
 	"time"
-	"log"
-	"github.com/gin-gonic/gin"
-	"github.com/go-projects/blog-service/internal/routers"
-	"github.com/go-projects/blog-service/internal/model"
-	"github.com/go-projects/blog-service/pkg/setting"
-	"github.com/go-projects/blog-service/pkg/logger"
-	"github.com/go-projects/blog-service/global"
-	"github.com/natefinch/lumberjack"
 )
 
 func init() {
@@ -26,6 +27,10 @@ func init() {
 	if err != nil {
 		log.Fatalf("init.setupLogger err: %v", err)
 	}
+	err = setupTracer()
+	if err != nil {
+		log.Fatalf("init.setupTracer err: %v", err)
+	}
 }
 
 // @title 博客系统
@@ -33,7 +38,7 @@ func init() {
 // @description Go之博客系统
 // @termsOfService https://github.com/go-programming-tour-book
 func main() {
-	global.Logger.Infof("%s: go-projects/%s", "eddycjy", "blog-service")
+	// global.Logger.Infof("%s: go-projects/%s", "eddycjy", "blog-service")
 	gin.SetMode(global.ServerSetting.RunMode)
 	router := routers.NewRouter()
 	s := &http.Server{
@@ -62,10 +67,19 @@ func setupSetting() error {
 	err = setting.ReadSection("Database", &global.DatabaseSetting)
 	if err != nil {
 		return err
-	} 
+	}
+	err = setting.ReadSection("JWT", &global.JWTSetting)
+	if err != nil {
+		return err
+	}
+	err = setting.ReadSection("Email", &global.EmailSetting)
+	if err != nil {
+		return err
+	}
 
 	global.ServerSetting.ReadTimeout *= time.Second
 	global.ServerSetting.WriteTimeout *= time.Second
+	global.JWTSetting.Expire *= time.Second
 
 	return nil
 }
@@ -89,5 +103,14 @@ func setupLogger() error {
 		LocalTime: true,
 		}, "", log.LstdFlags).WithCaller(2)
 
+	return nil
+}
+
+func setupTracer() error {
+	jaegerTracer, _, err := tracer.NewJaegerTracer("blog-service", "127.0.0.1:6831")
+	if err != nil {
+		return err
+	}
+	global.Tracer = jaegerTracer
 	return nil
 }
