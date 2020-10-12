@@ -1,6 +1,13 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-projects/blog-service/global"
 	"github.com/go-projects/blog-service/internal/model"
@@ -9,9 +16,6 @@ import (
 	"github.com/go-projects/blog-service/pkg/setting"
 	"github.com/go-projects/blog-service/pkg/tracer"
 	"github.com/natefinch/lumberjack"
-	"log"
-	"net/http"
-	"time"
 )
 
 func init() {
@@ -48,7 +52,28 @@ func main() {
 		WriteTimeout: global.ServerSetting.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
-	s.ListenAndServe()
+
+	go func() {
+		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("s.ListenAndServe err: %v", err)
+		}
+	}()
+
+	// 等待中断信号
+	quit := make(chan os.Signal)
+	// 接收 syscall.SIGINT 和 syscall.SIGTERM 信号
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shuting down server...")
+
+	// 最大时间控制，通知该服务端它有 5s 的时间来处理原有的请求
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := s.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("Server exiting")
 }
 
 func setupSetting() error {
