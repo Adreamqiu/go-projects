@@ -1,0 +1,36 @@
+go mod init github.com/go-projects/tag-service
+
+go get -u google.golang.org/grpc@v1.29.1
+
+go get -u github.com/golang/protobuf/protoc-gen-go@v1.3.3
+
+go get -u github.com/soheilhy/cmux
+
+go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.14.3
+
+go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
+
+go get -u github.com/go-bindata/go-bindata/...
+
+go get -u github.com/elazarl/go-bindata-assetfs/...
+
+protoc --go_out=plugins=grpc:. ./proto/*.proto
+
+protoc --go_out=plugins=grpc:. -I=C:/Users/Dell/go/src -I=. ./proto/*.proto
+win:
+protoc --go_out=plugins=grpc:. -I=%GOPATH%/src -I=. ./proto/*.proto
+linux:
+protoc --go_out=plugins=grpc:. -I=${GOPATH}/src -I=. ./proto/*.proto
+
+
+protoc -I. -I%GOPATH%/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.14.3/third_party/googleapis --grpc-gateway_out=logtostderr=true:. -I=%GOPATH%/src -I=. proto/*.proto
+
+protoc -I. -I%GOPATH%/pkg/mod/github.com/grpc-ecosystem/grpc-gateway@v1.14.3/third_party/googleapis --swagger_out=logtostderr=true:. -I=%GOPATH%/src -I=. proto/*.proto
+
+grpcurl -plaintext localhost:50051 list
+
+grpcurl -plaintext localhost:50051 list proto.TagService
+
+grpcurl -plaintext localhost:50054 proto.TagService.GetTagList
+
+go-bindata --nocompress -pkg swagger -o pkg/swagger/data.go third_party/swagger-ui/...
