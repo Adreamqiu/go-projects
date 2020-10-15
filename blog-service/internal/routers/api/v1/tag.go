@@ -2,9 +2,9 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-projects/blog-service/global"
 	"github.com/go-projects/blog-service/internal/service"
 	"github.com/go-projects/blog-service/pkg/app"
-	"github.com/go-projects/blog-service/global"
 	"github.com/go-projects/blog-service/pkg/convert"
 	"github.com/go-projects/blog-service/pkg/errcode"
 )
