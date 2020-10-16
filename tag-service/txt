@@ -14,6 +14,14 @@ go get -u github.com/go-bindata/go-bindata/...
 
 go get -u github.com/elazarl/go-bindata-assetfs/...
 
+go get -u github.com/grpc-ecosystem/go-grpc-middleware
+
+go get -u github.com/opentracing/opentracing-go
+
+go get -u github.com/uber/jaeger-client-go
+
+go get -u github.com/coreos/etcd/clientv3
+
 protoc --go_out=plugins=grpc:. ./proto/*.proto
 
 protoc --go_out=plugins=grpc:. -I=C:/Users/Dell/go/src -I=. ./proto/*.proto
@@ -34,3 +42,9 @@ grpcurl -plaintext localhost:50051 list proto.TagService
 grpcurl -plaintext localhost:50054 proto.TagService.GetTagList
 
 go-bindata --nocompress -pkg swagger -o pkg/swagger/data.go third_party/swagger-ui/...
+
+curl http://127.0.0.1:50054/api/v1/tags
+
+Issue: Import "google/api/annotations.proto" was not found or had errors.
+Solution: https://github.com/grpc-ecosystem/grpc-gateway/issues/574
+protoc -IG:\protoc-3.13.0-win64\include -I. -I%GOPATH%\src -I%GOPATH%\pkg\mod\github.com\grpc-ecosystem\grpc-gateway@v1.14.3\third_party\googleapis --go_out=plugins=grpc:. ./proto/*.proto

@@ -1,8 +1,7 @@
 package errcode
 
-import (
-	"fmt"
-)
+import "fmt"
+
 type Error struct {
 	code int
 	msg  string

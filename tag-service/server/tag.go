@@ -2,7 +2,6 @@ package server
 
 import (
 	pb "github.com/go-projects/tag-service/proto"
-
 	"context"
 	"encoding/json"
 	"github.com/go-projects/tag-service/pkg/errcode"

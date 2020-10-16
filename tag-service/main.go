@@ -16,6 +16,8 @@ import (
 	gwruntime "github.com/grpc-ecosystem/grpc-gateway/runtime"
 	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/go-projects/tag-service/pkg/swagger"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/go-projects/tag-service/internal/middleware"
 )
 
 var port string
@@ -72,7 +74,16 @@ func runHttpServer() *http.ServeMux {
 }
 
 func runGrpcServer() *grpc.Server {
-	s := grpc.NewServer()
+	opts := []grpc.ServerOption {
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			middleware.AccessLog,
+			middleware.ErrorLog,
+			middleware.Recovery,
+			middleware.ServerTracing,
+			)),
+	}
+
+	s := grpc.NewServer(opts...)
 	pb.RegisterTagServiceServer(s, server.NewTagServer())
 	reflection.Register(s)
 

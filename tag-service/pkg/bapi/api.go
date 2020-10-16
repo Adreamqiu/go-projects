@@ -1,15 +1,20 @@
 package bapi
 
 import (
-	"fmt"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/opentracing/opentracing-go/ext"
+
+	"github.com/opentracing/opentracing-go"
 )
 
 type API struct {
 	URL    string
+	Client *http.Client
 }
 
 type AccessToken struct {
@@ -17,12 +22,12 @@ type AccessToken struct {
 }
 
 const (
-	APP_KEY    = "eddycjy"
-	APP_SECRET = "go-programming-tour-book"
+	APP_KEY    = "qiusheng"
+	APP_SECRET = "go-projects"
 )
 
 func NewAPI(url string) *API {
-	return &API{URL: url}
+	return &API{URL: url, Client: http.DefaultClient}
 }
 
 func (a *API) GetTagList(ctx context.Context, name string) ([]byte, error) {
@@ -31,6 +36,41 @@ func (a *API) GetTagList(ctx context.Context, name string) ([]byte, error) {
 		return nil, err
 	}
 	body, err := a.httpGet(ctx, fmt.Sprintf("%s?token=%s&name=%s", "api/v1/tags", token, name))
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
+
+func (a *API) httpGet(ctx context.Context, path string) ([]byte, error) {
+	url := fmt.Sprintf("%s/%s", a.URL, path)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	span, _ := opentracing.StartSpanFromContext(
+		ctx, "HTTP GET: "+a.URL,
+		opentracing.Tag{Key: string(ext.Component), Value: "HTTP"},
+	)
+	span.SetTag("url", url)
+	_ = opentracing.GlobalTracer().Inject(
+		span.Context(),
+		opentracing.HTTPHeaders,
+		opentracing.HTTPHeadersCarrier(req.Header),
+	)
+
+	req = req.WithContext(context.Background())
+	client := http.Client{} //Timeout: time.Second * 60
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	defer span.Finish()
+
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -51,20 +91,4 @@ func (a *API) getAccessToken(ctx context.Context) (string, error) {
 	}
 
 	return accessToken.Token, nil
-}
-
-func (a *API) httpGet(ctx context.Context, path string) ([]byte, error) {
-	url := fmt.Sprintf("%s/%s", a.URL, path)
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return body, nil
 }
